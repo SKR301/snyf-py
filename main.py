@@ -1,6 +1,5 @@
 from scapy import all as scapy
 import pygeoip
-import traceback
 import sys
 
 interface = sys.argv[1]
