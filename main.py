@@ -1,3 +1,5 @@
 from scapy import all as scapy
+import sys
 
-scapy.sniff(iface="Ethernet", prn = lambda x: x.summary())
+interface = sys.argv[1]
+scapy.sniff(iface = interface, prn = lambda x: x.summary())
