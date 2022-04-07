@@ -1,9 +1,9 @@
 scapy
 pygeoip
-bokeh
-pandas
 datetime
-geopandas
 cartopy
 shapely
-geo
+geos
+pyshp
+proj
+pyptoj
