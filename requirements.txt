@@ -1,9 +1,0 @@
-scapy
-pygeoip
-datetime
-cartopy
-shapely
-geos
-pyshp
-proj
-pyptoj
