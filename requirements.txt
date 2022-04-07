@@ -3,3 +3,7 @@ pygeoip
 bokeh
 pandas
 datetime
+geopandas
+cartopy
+shapely
+geo

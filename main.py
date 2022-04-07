@@ -4,6 +4,7 @@ import datetime
 import traceback
 import sys
 from os import system
+import geopandas as gpd
 
 # interface = sys.argv[1]
 interface = 'Ethernet'
