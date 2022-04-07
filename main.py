@@ -26,6 +26,7 @@ def setLocalIP():
     IPs = os.popen('ipconfig | findstr IPv4').read().split('\n')[:-1]
     for ip in IPs:
         LOCAL_IPS.append(ip.split(': ')[1])
+        
 
 if __name__=='__main__':
     setLocalIP()
