@@ -30,32 +30,34 @@ def updateDict(key, input_dict):
             input_dict[key] = 1
     return input_dict
 
+cmap = mpl.cm.Blues
+fig = plt.figure(figsize=(7.5, 5))
+
+shapename = 'admin_0_countries'
+countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', name=shapename)
+val = 0
+ax = plt.axes(projection=ccrs.PlateCarree())
+
 def plotMap():
-    cmap = mpl.cm.Blues
-    fig = plt.figure(figsize=(7.5, 5))
-
-    shapename = 'admin_0_countries'
-    countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', name=shapename)
-
-    val = 0
-    ax = plt.axes(projection=ccrs.PlateCarree())
     for country in shpreader.Reader(countries_shp).records():
-        # print(country.attributes['NAME_LONG'], country.attributes['ISO_A2'])
-        
-        if country.attributes['ISO_A2'] == 'IN':    
-            geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
-        else:
-            geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+        ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
 
-    def update_map(data):
-        val = (data%255)/255
-        print(val)
-        for country in shpreader.Reader(countries_shp).records():
-            if country.attributes['ISO_A2'] == 'IN':    
-                ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
-
-    animatedPlt = FuncAnimation(fig, update_map, frames = 100)
+    animate = FuncAnimation(fig, update_map, frames = 100)
     plt.show()
+    
+def update_map(data):
+    global val
+    global src_loc_count
+    print('0',src_loc_count)
+    for country in shpreader.Reader(countries_shp).records():
+        # val = src_loc_count[country.attributes['ISO_A2']] if country.attributes['ISO_A2'] in src_loc_count else 0
+        # if country.attributes['ISO_A2'] in src_loc_count:
+        #     val = src_loc_count[country.attributes['ISO_A2']]
+        #     print('found something')
+        # else:
+        #     print(src_loc_count)
+        ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+
 
 def snyf():
     global src_loc_count
@@ -75,7 +77,8 @@ def snyf():
             dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
             
             # print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
-            print(src_loc_count, dst_loc_count)
+            # print(src_loc_count, dst_loc_count)
+            print('1',src_loc_count)
             # plotMap(src_loc_count)
             # plotMap(src_loc_count)
         except Exception as e: 
@@ -88,14 +91,7 @@ def setLocalIP():
         
 if __name__=='__main__':
     setLocalIP()
-    # t1 = threading.Thread(target=plotMap)
-    # t2 = threading.Thread(target=snyf)
     p1 = multiprocessing.Process(target=plotMap,args=())
     p2 = multiprocessing.Process(target=snyf,args=())
     p1.start()
     p2.start()
-
-    #Started the threads
-    # t1.start()
-    # plotMap()
-    # t2.start()
