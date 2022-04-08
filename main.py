@@ -34,8 +34,8 @@ def snyf():
             srcCC = 'LOCAL' if srcIP in LOCAL_IPS else ric.getCountryCodeFromIP(srcIP)
             dstCC = 'LOCAL' if dstIP in LOCAL_IPS else ric.getCountryCodeFromIP(dstIP)
 
-            src_loc_count = updateDict(srcCC, src_loc_count)
-            dst_loc_count = updateDict(dstCC, dst_loc_count)
+            src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
+            dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
                 
 
             # print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
