@@ -2,6 +2,8 @@ from scapy import all as scapy
 import read_ip_csv as ric
 import datetime
 import os
+import threading
+import multiprocessing
 import numpy as np
 import cartopy.crs as ccrs
 import cartopy.io.shapereader as shpreader
@@ -28,32 +30,32 @@ def updateDict(key, input_dict):
             input_dict[key] = 1
     return input_dict
 
-# def plotMap(data):
-#     cmap = mpl.cm.Blues
-#     fig = plt.figure(figsize=(7.5, 5))
+def plotMap():
+    cmap = mpl.cm.Blues
+    fig = plt.figure(figsize=(7.5, 5))
 
-#     shapename = 'admin_0_countries'
-#     countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', name=shapename)
+    shapename = 'admin_0_countries'
+    countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', name=shapename)
 
-#     val = 0
-#     ax = plt.axes(projection=ccrs.PlateCarree())
-#     for country in shpreader.Reader(countries_shp).records():
-#         # print(country.attributes['NAME_LONG'], country.attributes['ISO_A2'])
+    val = 0
+    ax = plt.axes(projection=ccrs.PlateCarree())
+    for country in shpreader.Reader(countries_shp).records():
+        # print(country.attributes['NAME_LONG'], country.attributes['ISO_A2'])
         
-#         if country.attributes['ISO_A2'] == 'IN':    
-#             geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
-#         else:
-#             geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+        if country.attributes['ISO_A2'] == 'IN':    
+            geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+        else:
+            geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
 
-#     def update_map(data):
-#         val = (data%255)/255
-#         print(val)
-#         for country in shpreader.Reader(countries_shp).records():
-#             if country.attributes['ISO_A2'] == 'IN':    
-#                 ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+    def update_map(data):
+        val = (data%255)/255
+        print(val)
+        for country in shpreader.Reader(countries_shp).records():
+            if country.attributes['ISO_A2'] == 'IN':    
+                ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
 
-#     animatedPlt = FuncAnimation(fig, update_map, frames = 100)
-#     plt.show()
+    animatedPlt = FuncAnimation(fig, update_map, frames = 100)
+    plt.show()
 
 def snyf():
     global src_loc_count
@@ -86,4 +88,14 @@ def setLocalIP():
         
 if __name__=='__main__':
     setLocalIP()
-    snyf()
+    # t1 = threading.Thread(target=plotMap)
+    # t2 = threading.Thread(target=snyf)
+    p1 = multiprocessing.Process(target=plotMap,args=())
+    p2 = multiprocessing.Process(target=snyf,args=())
+    p1.start()
+    p2.start()
+
+    #Started the threads
+    # t1.start()
+    # plotMap()
+    # t2.start()
