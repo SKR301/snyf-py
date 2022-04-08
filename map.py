@@ -1,29 +1,35 @@
 import cartopy.crs as ccrs
 import cartopy.io.shapereader as shpreader
+from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import numpy as np
-import itertools
-
-from pytz import country_names
 
 cmap = mpl.cm.Blues
+fig = plt.figure(figsize=(7.5, 5))
 
 test = 0
 shapename = 'admin_0_countries'
 countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', name=shapename)
 
 
+val = 0
 ax = plt.axes(projection=ccrs.PlateCarree())
-
+geometry = ''
 for country in shpreader.Reader(countries_shp).records():
-    print(country.attributes['NAME_LONG'], country.attributes['ISO_A2'])
+    # print(country.attributes['NAME_LONG'], country.attributes['ISO_A2'])
     
-    # if len(country.attributes['NAME_LONG']) < 5:    
-    #     ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(0, 0, 0), label=country.attributes['NAME_LONG'])
-    # else:
-    #     ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(0.588, 0.588, 0.588), label=country.attributes['NAME_LONG'])
-    # print(country.attributes['NAME_SORT'], country.attributes['NAME_LONG'], country.attributes['SOV_A3'], )
+    if country.attributes['ISO_A2'] == 'IN':    
+        geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+    else:
+        geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
 
-# print(shpreader.Reader(countries_shp).records())
-# plt.show()
+def update_map(data):
+    val = (data%255)/255
+    print(val)
+    for country in shpreader.Reader(countries_shp).records():
+        if country.attributes['ISO_A2'] == 'IN':    
+            ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+
+# print(country.geometry)
+animatedPlt = FuncAnimation(fig, update_map, frames = 100)
+plt.show()
