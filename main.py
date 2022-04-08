@@ -3,10 +3,17 @@ import read_ip_csv as ric
 import datetime
 import os
 import numpy as np
+import cartopy.crs as ccrs
+import cartopy.io.shapereader as shpreader
+from matplotlib.animation import FuncAnimation
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 # INTERFACE = sys.argv[1]
 INTERFACE = 'Ethernet'
 LOCAL_IPS = []
+src_loc_count = {}
+dst_loc_count = {}
 
 def normalizeDict(input_dict):
     X = np.array([val for val in input_dict.values()])
@@ -14,15 +21,43 @@ def normalizeDict(input_dict):
     return {key : input_dict[key]/norm_1 for key in input_dict.keys()}
 
 def updateDict(key, input_dict):
-    if key in input_dict:
-        input_dict[key] = input_dict[key]+1
-    else:
-        input_dict[key] = 1
+    if not key == 'LOCAL':
+        if key in input_dict:
+            input_dict[key] = input_dict[key]+1
+        else:
+            input_dict[key] = 1
     return input_dict
 
+# def plotMap(data):
+#     cmap = mpl.cm.Blues
+#     fig = plt.figure(figsize=(7.5, 5))
+
+#     shapename = 'admin_0_countries'
+#     countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', name=shapename)
+
+#     val = 0
+#     ax = plt.axes(projection=ccrs.PlateCarree())
+#     for country in shpreader.Reader(countries_shp).records():
+#         # print(country.attributes['NAME_LONG'], country.attributes['ISO_A2'])
+        
+#         if country.attributes['ISO_A2'] == 'IN':    
+#             geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+#         else:
+#             geometry = ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+
+#     def update_map(data):
+#         val = (data%255)/255
+#         print(val)
+#         for country in shpreader.Reader(countries_shp).records():
+#             if country.attributes['ISO_A2'] == 'IN':    
+#                 ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+
+#     animatedPlt = FuncAnimation(fig, update_map, frames = 100)
+#     plt.show()
+
 def snyf():
-    src_loc_count = {}
-    dst_loc_count = {}
+    global src_loc_count
+    global dst_loc_count
     
     while True:
         pkt = scapy.sniff(count =1, iface = INTERFACE)
@@ -36,10 +71,11 @@ def snyf():
 
             src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
             dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
-                
-
+            
             # print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
             print(src_loc_count, dst_loc_count)
+            # plotMap(src_loc_count)
+            # plotMap(src_loc_count)
         except Exception as e: 
             print()
 
@@ -48,7 +84,6 @@ def setLocalIP():
     for ip in IPs:
         LOCAL_IPS.append(ip.split(': ')[1])
         
-
 if __name__=='__main__':
     setLocalIP()
     snyf()
