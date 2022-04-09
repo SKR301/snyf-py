@@ -14,8 +14,6 @@ import matplotlib as mpl
 # INTERFACE = sys.argv[1]
 INTERFACE = 'Ethernet'
 LOCAL_IPS = []
-src_loc_count = {}
-dst_loc_count = {}
 
 def normalizeDict(input_dict):
     X = np.array([val for val in input_dict.values()])
@@ -35,29 +33,24 @@ fig = plt.figure(figsize=(7.5, 5))
 
 shapename = 'admin_0_countries'
 countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', name=shapename)
-val = 0
 ax = plt.axes(projection=ccrs.PlateCarree())
 
 def plotMap(src_loc_count, dst_loc_count):
-    for country in shpreader.Reader(countries_shp).records():
-        ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
-
-    animate = FuncAnimation(fig, update_map, fargs=(1,2), frames = 100)
+    animate = FuncAnimation(fig, updateMap, fargs=(src_loc_count, dst_loc_count), init_func=initMap, frames = 100)
     plt.show()
 
-def update_map(data, val1,val2):
-    global val
-    
-    print('-------', val1,val2)
+def initMap():
     for country in shpreader.Reader(countries_shp).records():
-        # val = src_loc_count[country.attributes['ISO_A2']] if country.attributes['ISO_A2'] in src_loc_count else 0
-        # if country.attributes['ISO_A2'] in src_loc_count:
-        #     val = src_loc_count[country.attributes['ISO_A2']]
-        #     print('found something')
-        # else:
-        #     print(src_loc_count)
-        ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+        ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(0, 0, 0), label=country.attributes['NAME_LONG'])
 
+def updateMap(data, src_loc_count, dst_loc_count):
+    global val
+    for country in shpreader.Reader(countries_shp).records():
+        if country.attributes['ISO_A2'] in src_loc_count:
+            val = src_loc_count[country.attributes['ISO_A2']]
+            ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+        else:
+            print(src_loc_count)
 
 def snyf(src_loc_count, dst_loc_count):
     # global src_loc_count
@@ -91,7 +84,13 @@ def setLocalIP():
         
 if __name__=='__main__':
     setLocalIP()
-    p1 = multiprocessing.Process(target=plotMap,args=(src_loc_count,dst_loc_count,))
-    p2 = multiprocessing.Process(target=snyf,args=(src_loc_count,dst_loc_count,))
+
+    manager = multiprocessing.Manager()
+    src_loc_count = manager.dict()
+    dst_loc_count = manager.dict()
+    p1 = multiprocessing.Process(target=snyf, args=(src_loc_count,dst_loc_count,))
+    p2 = multiprocessing.Process(target=plotMap, args=(src_loc_count,dst_loc_count,))
     p1.start()
     p2.start()
+    p1.join()
+    p2.join()

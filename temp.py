@@ -1,21 +1,20 @@
 import multiprocessing
 
-p = []
-
-def process1(p):
+def f1(d):
     while True:
-        print('1>',p)
+        print(d)
 
-def prin(p):
-    print('!!!!!!!!!!!!!!!!!',p)
-
-def process2(p):
+def f2(d):
     while True:
-        p.append(2)
-        prin(p)
+        d[1] = d[1] + [4]
 
-if __name__=='__main__':
-    p1 = multiprocessing.Process(target=process1, args=(p,))
-    p2 = multiprocessing.Process(target=process2, args=(p,)) 
-    p2.start()
+if __name__ == '__main__':
+    manager = multiprocessing.Manager()
+    d = manager.dict()
+    d[1] = []
+    p1 = multiprocessing.Process(target=f1,args=(d,))
+    p2 = multiprocessing.Process(target=f2,args=(d,))
     p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
