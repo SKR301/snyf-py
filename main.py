@@ -38,17 +38,17 @@ countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', 
 val = 0
 ax = plt.axes(projection=ccrs.PlateCarree())
 
-def plotMap():
+def plotMap(src_loc_count, dst_loc_count):
     for country in shpreader.Reader(countries_shp).records():
         ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
 
-    animate = FuncAnimation(fig, update_map, frames = 100)
+    animate = FuncAnimation(fig, update_map, fargs=(1,2), frames = 100)
     plt.show()
-    
-def update_map(data):
+
+def update_map(data, val1,val2):
     global val
-    global src_loc_count
-    print('0',src_loc_count)
+    
+    print('-------', val1,val2)
     for country in shpreader.Reader(countries_shp).records():
         # val = src_loc_count[country.attributes['ISO_A2']] if country.attributes['ISO_A2'] in src_loc_count else 0
         # if country.attributes['ISO_A2'] in src_loc_count:
@@ -59,9 +59,9 @@ def update_map(data):
         ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
 
 
-def snyf():
-    global src_loc_count
-    global dst_loc_count
+def snyf(src_loc_count, dst_loc_count):
+    # global src_loc_count
+    # global dst_loc_count
     
     while True:
         pkt = scapy.sniff(count =1, iface = INTERFACE)
@@ -91,7 +91,7 @@ def setLocalIP():
         
 if __name__=='__main__':
     setLocalIP()
-    p1 = multiprocessing.Process(target=plotMap,args=())
-    p2 = multiprocessing.Process(target=snyf,args=())
+    p1 = multiprocessing.Process(target=plotMap,args=(src_loc_count,dst_loc_count,))
+    p2 = multiprocessing.Process(target=snyf,args=(src_loc_count,dst_loc_count,))
     p1.start()
     p2.start()
