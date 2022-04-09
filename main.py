@@ -34,6 +34,7 @@ def updateDict(key, input_dict):
     return input_dict
 
 def plotMap(src_loc_count, dst_loc_count):
+    # animate = FuncAnimation(fig, updateMap, frames = 100)
     animate = FuncAnimation(fig, updateMap, fargs=(src_loc_count, dst_loc_count), init_func=initMap, frames = 100)
     plt.show()
 
@@ -71,14 +72,16 @@ def snyf(src_loc_count, dst_loc_count):
             # plotMap(src_loc_count)
             # plotMap(src_loc_count)
         except Exception as e: 
-            print()
+            print(str(e))
 
 def setLocalIP():
     print('Getting local IP')
     IPs = os.popen('ipconfig | findstr IPv4').read().split('\n')[:-1]
     for ip in IPs:
         LOCAL_IPS.append(ip.split(': ')[1])
-        
+
+# src_loc_count = {}
+
 if __name__=='__main__':
     setLocalIP()
 
@@ -87,9 +90,12 @@ if __name__=='__main__':
     dst_loc_count = manager.dict()
 
     p1 = multiprocessing.Process(target=snyf, args=(src_loc_count,dst_loc_count,))
-    p2 = multiprocessing.Process(target=plotMap, args=(src_loc_count,dst_loc_count,))
+    # p2 = multiprocessing.Process(target=plotMap, args=(src_loc_count,dst_loc_count,))
 
     p1.start()
-    p2.start()
-    p1.join()
-    p2.join()
+
+    animate = FuncAnimation(fig, updateMap, fargs=(src_loc_count, dst_loc_count), init_func=initMap, frames = 100)
+    plt.show()
+    # p2.start()
+    # p1.join()
+    # p2.join()
