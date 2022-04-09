@@ -59,9 +59,11 @@ def updateMap(data):
         src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
         # dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
         
+        print(src_loc_count)
         for country in shpreader.Reader(countries_shp).records():
             if country.attributes['ISO_A2'] in src_loc_count:
                 val = src_loc_count[country.attributes['ISO_A2']]
+                print(country.attributes['ISO_A2'], val)
                 ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
     
     except Exception as e: 
