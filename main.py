@@ -51,23 +51,23 @@ def updateMap(data):
     pkt = scapy.sniff(count = 1, iface = INTERFACE)
     try:
         srcIP = pkt[0].getlayer("IP").src
-        # dstIP = pkt[0].getlayer("IP").dst
+        dstIP = pkt[0].getlayer("IP").dst
 
         srcCC = 'LOCAL' if srcIP in LOCAL_IPS else ric.getCountryCodeFromIP(srcIP)
-        # dstCC = 'LOCAL' if dstIP in LOCAL_IPS else ric.getCountryCodeFromIP(dstIP)
+        dstCC = 'LOCAL' if dstIP in LOCAL_IPS else ric.getCountryCodeFromIP(dstIP)
 
         src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
-        # dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
+        dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
+
+        print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
         
-        print(src_loc_count)
         for country in shpreader.Reader(countries_shp).records():
             if country.attributes['ISO_A2'] in src_loc_count:
                 val = src_loc_count[country.attributes['ISO_A2']]
-                print(country.attributes['ISO_A2'], val)
                 ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
     
     except Exception as e: 
-        print(e)
+        print()
 
 def snyf(src_loc_count, dst_loc_count):
     print('Starting Snyfing')
@@ -85,8 +85,8 @@ def snyf(src_loc_count, dst_loc_count):
             src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
             dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
             # print(srcIP, dstIP)
-            # print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
-            print(1, src_loc_count, dst_loc_count)
+            print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
+            # print(1, src_loc_count, dst_loc_count)
             # plotMap(src_loc_count)
             # plotMap(src_loc_count)
         except Exception as e: 
@@ -94,7 +94,7 @@ def snyf(src_loc_count, dst_loc_count):
 
 def setLocalIP():
     print('Getting local IP')
-    IPs = os.popen('ipconfig | findstr IPv4').read().split('\n')[:-1]
+    IPs = os.popen('ipconfig | findstr "IPv4 Default Gateway"').read().split('\n')[:-1]
     for ip in IPs:
         LOCAL_IPS.append(ip.split(': ')[1])
 
