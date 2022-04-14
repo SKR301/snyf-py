@@ -23,10 +23,10 @@ shapename = 'admin_0_countries'
 countries_shp = shpreader.natural_earth(resolution='110m', category='cultural', name=shapename)
 ax = plt.axes(projection=ccrs.PlateCarree())
 
-def normalizeDict(input_dict):
-    X = np.array([val for val in input_dict.values()])
-    norm_1 = np.abs(X).sum()
-    return {key : input_dict[key]/norm_1 for key in input_dict.keys()}
+# def normalizeDict(input_dict):
+#     X = np.array([val for val in input_dict.values()])
+#     norm_1 = np.abs(X).sum()
+#     return {key : input_dict[key]/norm_1 for key in input_dict.keys()}
 
 def updateDict(key, input_dict):
     if not key == 'LOCAL':
@@ -36,10 +36,10 @@ def updateDict(key, input_dict):
             input_dict[key] = 1
     return input_dict
 
-def plotMap(src_loc_count, dst_loc_count):
-    # animate = FuncAnimation(fig, updateMap, frames = 100)
-    animate = FuncAnimation(fig, updateMap, fargs=(src_loc_count, dst_loc_count), init_func=initMap, frames = 100)
-    plt.show()
+# def plotMap(src_loc_count, dst_loc_count):
+#     # animate = FuncAnimation(fig, updateMap, frames = 100)
+#     animate = FuncAnimation(fig, updateMap, fargs=(src_loc_count, dst_loc_count), init_func=initMap, frames = 100)
+#     plt.show()
 
 def initMap():
     for country in shpreader.Reader(countries_shp).records():
