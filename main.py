@@ -13,6 +13,8 @@ import matplotlib as mpl
 # INTERFACE = sys.argv[1]
 INTERFACE = 'Ethernet'
 LOCAL_IPS = []
+src_loc_count = {}
+dst_loc_count = {}
 
 cmap = mpl.cm.Blues
 fig = plt.figure(figsize=(7.5, 5))
@@ -42,14 +44,30 @@ def initMap():
     for country in shpreader.Reader(countries_shp).records():
         ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(0, 0, 0), label=country.attributes['NAME_LONG'])
 
-def updateMap(data, src_loc_count, dst_loc_count):
-    print(2, src_loc_count)
-    # for country in shpreader.Reader(countries_shp).records():
-    #     if country.attributes['ISO_A2'] in src_loc_count:
-    #         val = src_loc_count[country.attributes['ISO_A2']]
-    #         ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
-        # else:
-        #     print()
+def updateMap(data):
+    global src_loc_count
+    global dst_loc_count
+
+    pkt = scapy.sniff(count = 1, iface = INTERFACE)
+    try:
+        srcIP = pkt[0].getlayer("IP").src
+        # dstIP = pkt[0].getlayer("IP").dst
+
+        srcCC = 'LOCAL' if srcIP in LOCAL_IPS else ric.getCountryCodeFromIP(srcIP)
+        # dstCC = 'LOCAL' if dstIP in LOCAL_IPS else ric.getCountryCodeFromIP(dstIP)
+
+        src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
+        # dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
+        
+        print(src_loc_count)
+        for country in shpreader.Reader(countries_shp).records():
+            if country.attributes['ISO_A2'] in src_loc_count:
+                val = src_loc_count[country.attributes['ISO_A2']]
+                print(country.attributes['ISO_A2'], val)
+                ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+    
+    except Exception as e: 
+        print(e)
 
 def snyf(src_loc_count, dst_loc_count):
     print('Starting Snyfing')
@@ -80,22 +98,7 @@ def setLocalIP():
     for ip in IPs:
         LOCAL_IPS.append(ip.split(': ')[1])
 
-# src_loc_count = {}
-
 if __name__=='__main__':
     setLocalIP()
-
-    manager = multiprocessing.Manager()
-    src_loc_count = manager.dict()
-    dst_loc_count = manager.dict()
-
-    p1 = multiprocessing.Process(target=snyf, args=(src_loc_count,dst_loc_count,))
-    # p2 = multiprocessing.Process(target=plotMap, args=(src_loc_count,dst_loc_count,))
-
-    p1.start()
-
-    animate = FuncAnimation(fig, updateMap, fargs=(src_loc_count, dst_loc_count), init_func=initMap, frames = 100)
+    animate = FuncAnimation(fig, updateMap, init_func=initMap, frames = 100)
     plt.show()
-    # p2.start()
-    # p1.join()
-    # p2.join()
