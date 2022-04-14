@@ -13,6 +13,7 @@ import matplotlib as mpl
 # INTERFACE = sys.argv[1]
 INTERFACE = 'Ethernet'
 LOCAL_IPS = []
+COLORS = [[0,26,255],[0,255,247],[0,255,137],[128,255,0],[255,213,0],[255,128,0],[255,0,0]]
 src_loc_count = {}
 dst_loc_count = {}
 
@@ -56,41 +57,52 @@ def updateMap(data):
         srcCC = 'LOCAL' if srcIP in LOCAL_IPS else ric.getCountryCodeFromIP(srcIP)
         dstCC = 'LOCAL' if dstIP in LOCAL_IPS else ric.getCountryCodeFromIP(dstIP)
 
-        src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
-        dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
+        # src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
+        # dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
+        src_loc_count = updateDict(srcCC, src_loc_count)
+        dst_loc_count = updateDict(dstCC, dst_loc_count)
 
         print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
         
         for country in shpreader.Reader(countries_shp).records():
             if country.attributes['ISO_A2'] in src_loc_count:
-                val = src_loc_count[country.attributes['ISO_A2']]
+                val = COLORS[0]
+                if src_loc_count[country.attributes['ISO_A2']] > 50:
+                    val = COLORS[1]
+                if src_loc_count[country.attributes['ISO_A2']] > 100:
+                    val = COLORS[2]
+                if src_loc_count[country.attributes['ISO_A2']] > 500:
+                    val = COLORS[3]
+                if src_loc_count[country.attributes['ISO_A2']] > 1000:
+                    val = COLORS[4]
+                if src_loc_count[country.attributes['ISO_A2']] > 5000:
+                    val = COLORS[5]
+                if src_loc_count[country.attributes['ISO_A2']] > 100000:
+                    val = COLORS[6]
+                
                 ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
     
     except Exception as e: 
         print()
 
-def snyf(src_loc_count, dst_loc_count):
-    print('Starting Snyfing')
-    
-    while True:
-        pkt = scapy.sniff(count = 1, iface = INTERFACE)
-        
-        try:
-            srcIP = pkt[0].getlayer("IP").src
-            dstIP = pkt[0].getlayer("IP").dst
-
-            srcCC = 'LOCAL' if srcIP in LOCAL_IPS else ric.getCountryCodeFromIP(srcIP)
-            dstCC = 'LOCAL' if dstIP in LOCAL_IPS else ric.getCountryCodeFromIP(dstIP)
-
-            src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
-            dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
-            # print(srcIP, dstIP)
-            print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
-            # print(1, src_loc_count, dst_loc_count)
-            # plotMap(src_loc_count)
-            # plotMap(src_loc_count)
-        except Exception as e: 
-            print(str(e))
+# def snyf(src_loc_count, dst_loc_count):
+#     print('Starting Snyfing')
+#     while True:
+#         pkt = scapy.sniff(count = 1, iface = INTERFACE)
+#         try:
+#             srcIP = pkt[0].getlayer("IP").src
+#             dstIP = pkt[0].getlayer("IP").dst
+#             srcCC = 'LOCAL' if srcIP in LOCAL_IPS else ric.getCountryCodeFromIP(srcIP)
+#             dstCC = 'LOCAL' if dstIP in LOCAL_IPS else ric.getCountryCodeFromIP(dstIP)
+#             src_loc_count = normalizeDict(updateDict(srcCC, src_loc_count))
+#             dst_loc_count = normalizeDict(updateDict(dstCC, dst_loc_count))
+#             # print(srcIP, dstIP)
+#             print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
+#             # print(1, src_loc_count, dst_loc_count)
+#             # plotMap(src_loc_count)
+#             # plotMap(src_loc_count)
+#         except Exception as e: 
+#             print(str(e))
 
 def setLocalIP():
     print('Getting local IP')
