@@ -2,3 +2,6 @@ scapy
 pandas
 datetime
 os
+sys
+cartopy
+matplotlib
