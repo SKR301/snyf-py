@@ -13,7 +13,7 @@ import matplotlib as mpl
 # INTERFACE = sys.argv[1]
 INTERFACE = 'Ethernet'
 LOCAL_IPS = []
-COLORS = [[0,26,255],[0,255,247],[0,255,137],[128,255,0],[255,213,0],[255,128,0],[255,0,0]]
+COLORS = [(0,0.10,1),(0,1,1),(0,1,0.53),(0.5,1,0),(1,0.83,0),(1,0.5,0),(1,0,0)]
 src_loc_count = {}
 dst_loc_count = {}
 
@@ -43,11 +43,12 @@ def plotMap(src_loc_count, dst_loc_count):
 
 def initMap():
     for country in shpreader.Reader(countries_shp).records():
-        ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(0, 0, 0), label=country.attributes['NAME_LONG'])
+        ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(1, 1, 1), label=country.attributes['NAME_LONG'])
 
 def updateMap(data):
     global src_loc_count
     global dst_loc_count
+    global COLORS
 
     pkt = scapy.sniff(count = 1, iface = INTERFACE)
     try:
@@ -62,25 +63,25 @@ def updateMap(data):
         src_loc_count = updateDict(srcCC, src_loc_count)
         dst_loc_count = updateDict(dstCC, dst_loc_count)
 
-        print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
+        # print(srcIP, '\t', srcCC, '\t', dstIP, '\t', dstCC, '\t', datetime.datetime.now())
         
         for country in shpreader.Reader(countries_shp).records():
             if country.attributes['ISO_A2'] in src_loc_count:
                 val = COLORS[0]
-                if src_loc_count[country.attributes['ISO_A2']] > 50:
+                if src_loc_count[country.attributes['ISO_A2']] > 10:
                     val = COLORS[1]
-                if src_loc_count[country.attributes['ISO_A2']] > 100:
+                if src_loc_count[country.attributes['ISO_A2']] > 50:
                     val = COLORS[2]
-                if src_loc_count[country.attributes['ISO_A2']] > 500:
+                if src_loc_count[country.attributes['ISO_A2']] > 100:
                     val = COLORS[3]
-                if src_loc_count[country.attributes['ISO_A2']] > 1000:
+                if src_loc_count[country.attributes['ISO_A2']] > 500:
                     val = COLORS[4]
-                if src_loc_count[country.attributes['ISO_A2']] > 5000:
+                if src_loc_count[country.attributes['ISO_A2']] > 1000:
                     val = COLORS[5]
-                if src_loc_count[country.attributes['ISO_A2']] > 100000:
+                if src_loc_count[country.attributes['ISO_A2']] > 5000:
                     val = COLORS[6]
-                
-                ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=(val, val, val), label=country.attributes['NAME_LONG'])
+                # print(src_loc_count[country.attributes['ISO_A2']])
+                ax.add_geometries([country.geometry], ccrs.PlateCarree(), facecolor=val, label=country.attributes['NAME_LONG'])
     
     except Exception as e: 
         print()
